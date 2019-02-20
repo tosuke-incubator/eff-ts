@@ -1,5 +1,5 @@
 import { Eff, MapFunc, ChainFunc } from '../eff'
-import { Pure, pure } from '../freer'
+import { Pure } from '../freer'
 
 export type IdentityEff<A> = Eff<A, never>
 export class Identity<A> implements IdentityEff<A> {
@@ -7,11 +7,11 @@ export class Identity<A> implements IdentityEff<A> {
   private constructor(readonly freer: Pure<A>) {}
 
   static of<A>(a: A): Identity<A> {
-    return new Identity(pure(a))
+    return new Identity(new Pure(a))
   }
 
   static lift<A>(eff: IdentityEff<A>): Identity<A> {
-    if (eff.freer.type === 'pure') {
+    if (eff.freer.type === 'Pure') {
       return new Identity(eff.freer)
     } else {
       throw 'unreachable'
@@ -19,10 +19,10 @@ export class Identity<A> implements IdentityEff<A> {
   }
 
   map<B>(f: MapFunc<A, B>): Identity<B> {
-    return Identity.of(f(this.freer.val))
+    return Identity.of(f(this.freer.value))
   }
 
   chain<B>(f: ChainFunc<A, B, never>): Identity<B> {
-    return Identity.lift(f(this.freer.val))
+    return Identity.lift(f(this.freer.value))
   }
 }

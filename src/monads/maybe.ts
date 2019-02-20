@@ -1,8 +1,7 @@
 import { Eff } from '../eff'
-import { liftF } from '../util'
+import { liftF, fromFreer } from '../util'
 import { Effect } from '../effect'
-import { Freer, pure, impure } from '../freer'
-import { Boxed } from './boxed'
+import { Freer, Pure, Impure, Leaf } from '../freer'
 
 export type Maybe<A> =
   | {
@@ -40,21 +39,21 @@ export function nothingM<A>(): MaybeEff<A> {
 
 type Diff<E extends Effect, D extends Effect> = E extends D ? never : E
 
-export function runMaybe<A, EffectA extends Effect>(eff: Eff<A, EffectA>): Eff<Maybe<A>, Diff<EffectA, Maybe<A>>> {
-  return new Boxed(runMaybeImpl(eff.freer))
+export function runMaybe<A, EffectA extends Effect>(eff: Eff<A, EffectA>): Eff<Maybe<A>, Diff<EffectA, Maybe<any>>> {
+  return fromFreer(runMaybeImpl(eff.freer))
 }
 
-function runMaybeImpl<A, EffectA extends Effect>(freer: Freer<A, EffectA>): Freer<Maybe<A>, Diff<EffectA, Maybe<A>>> {
-  if (freer.type === 'pure') return pure(just(freer.val))
+function runMaybeImpl<A, EffectA extends Effect>(freer: Freer<A, EffectA>): Freer<Maybe<A>, Diff<EffectA, Maybe<any>>> {
+  if (freer.type === 'Pure') return new Pure(just(freer.value))
   if (isMaybe(freer.fx)) {
     const effect = freer.fx
     if (effect.type === 'just') {
-      return runMaybeImpl(freer.k(effect.val))
+      return runMaybeImpl(freer.k.apply(effect.val))
     } else {
-      return pure(nothing())
+      return new Pure(nothing())
     }
   } else {
-    return impure(freer.fx, x => runMaybeImpl(freer.k(x)))
+    return new Impure(freer.fx, new Leaf(x => runMaybeImpl(freer.k.apply(x))))
   }
 }
 

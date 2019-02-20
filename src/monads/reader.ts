@@ -1,13 +1,9 @@
 import { Eff } from '../eff'
-import { liftF } from '../util'
+import { fromFreer, liftF } from '../util'
 import { Effect } from '../effect';
-import { Freer, pure, impure } from '../freer';
-import { Boxed } from './boxed';
+import { Freer, Impure, Leaf } from '../freer';
 
-export type ReaderEffects<E> = {
-  type: 'ask',
-  _Return?: E
-}
+export type ReaderEffects<E> = Effect<'ask', E>
 
 export type ReaderEff<E, A> = Eff<A, ReaderEffects<E>>
 
@@ -17,18 +13,18 @@ export function makeAsk<E>(): ReaderEff<E, E> {
 
 type Diff<E extends Effect, D extends Effect> = E extends D ? never : E
 
-type ReaderRunner<E> = <A, EffectsA extends Effect>(eff: Eff<A, EffectsA>) => Eff<A, Diff<EffectsA, ReaderEffects<E>>>
+type ReaderRunner<E> = <A, FA extends Effect>(eff: Eff<A, FA>) => Eff<A, Diff<FA, ReaderEffects<E>>>
 
 export function runReader<E>(env: E): ReaderRunner<E> {
-  function runReaderImpl<A, EffectsA extends Effect>(freer: Freer<A, EffectsA>): Freer<A, Diff<EffectsA, ReaderEffects<E>>> {
-    if (freer.type === 'pure') return freer
+  function runReaderImpl<A, FA extends Effect>(freer: Freer<A, FA>): Freer<A, Diff<FA, ReaderEffects<E>>> {
+    if (freer.type === 'Pure') return freer
     if (isReaderEffect<E>(freer.fx)) {
-      return runReaderImpl(freer.k(env))
+      return runReaderImpl(freer.k.apply(env))
     } else {
-      return impure(freer.fx, x => runReaderImpl(freer.k(x)))
+      return new Impure(freer.fx, new Leaf(x => runReaderImpl(freer.k.apply(x))))
     }
   }
-  return eff => new Boxed(runReaderImpl(eff.freer))
+  return eff => fromFreer(runReaderImpl(eff.freer))
 }
 
 function isReaderEffect<E>(effect: Effect): effect is ReaderEffects<E> {
