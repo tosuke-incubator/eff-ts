@@ -56,10 +56,10 @@ ts-node@^8.0.2:
     source-map-support "^0.5.6"
     yn "^3.0.0"
 
-typescript@^3.4.0-dev.20190216:
-  version "3.4.0-dev.20190216"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.0-dev.20190216.tgz#b1e4596850af8d6289fdafeb2f56d32e597ee418"
-  integrity sha512-46/6VqUDONOFriBe/u7aSPon6xF0sBsRWCkE9Ue/vF8ssrligDaW9Cs5YLQ5gv6rgsHJ8IX0HwugcH6hTpCReg==
+typescript@^3.4.0-dev.20190227:
+  version "3.4.0-dev.20190227"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.0-dev.20190227.tgz#4e9be69d5d5a6379b8cf01e7bdf8fb3b2a6497d9"
+  integrity sha512-zla5hBSJ6CFqJQiAaDY/2lGqrimPk2FgOuawA3JWIAk0tiSkzqWOlgBl2HOU+TpILR4P/ZNDNLjaLxB9bNHJRg==
 
 yn@^3.0.0:
   version "3.0.0"
